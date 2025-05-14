@@ -2,8 +2,11 @@ import express from 'express';
 import path from 'path';
 import fs from 'fs';
 import dotenv from 'dotenv';
+import multer from 'multer';
 
 dotenv.config();
+
+
 
 const app = express();
 const HOST = process.env.HOST || 'http://localhost';
@@ -11,6 +14,7 @@ const PORT = process.env.PORT || 3000;
 const imagesDir = path.join(__dirname, '../public/images');
 const storageDir = path.join(__dirname, '../storage');
 const publicStorageLink = path.join(__dirname, '../public/storage');
+const upload = multer({ dest: 'uploads/' });
 
 function createSymlink() {
   try {
@@ -50,6 +54,16 @@ app.get('/', (req, res) => {
     <p>To access images, visit: <a href="/images">/images</a></p>
     <p>To access storage files, visit: <a href="/storage">/storage</a></p>
   `);
+});
+
+app.post('/api/upload', upload.single('file'), (req, res) => {
+  res.send('Archivo subido exitosamente');
+});
+
+app.delete('/api/delete', (req, res) => {
+  const filename = req.body.filename;
+  // Logic for deleting the file
+  res.send('Archivo eliminado exitosamente');
 });
 
 app.listen(PORT, () => {
