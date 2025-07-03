@@ -7,27 +7,25 @@ import multer from 'multer';
 
 dotenv.config();
 
-
-
 const app = express();
 const HOST = process.env.HOST || 'http://localhost';
 const PORT = process.env.PORT || 3000;
 
 
-/*// Configura CORS (permite solo tu dominio Vue.js)
+// Configura CORS (permite solo tu dominio Vue.js)
 app.use(cors({
   origin: 'http://localhost:5174',
   methods: ['GET', 'OPTIONS'],
   allowedHeaders: ['Content-Type', 'Authorization']
 }));
-*/
+
 
 // Permitir CORS para todos los orígenes (¡solo desarrollo!)
-app.use((req, res, next) => {
+/*app.use((req, res, next) => {
   res.header('Access-Control-Allow-Origin', '*');
   res.header('Access-Control-Allow-Methods', 'GET');
   next();
-});
+});*/
 
 const imagesDir = path.join(__dirname, '../public/images');
 const storageDir = path.join(__dirname, '../storage');
@@ -87,14 +85,12 @@ app.delete('/api/delete', (req, res) => {
 
 
 
-// Servir archivos estáticos desde /storage/images
+// Serving static files from 'public/images'
 app.get('/api/public-file/:filename', (req, res) => {
-  const filePath = path.join(__dirname, 'storage', 'images', req.params.filename);
-  
+  const filePath = path.join(imagesDir, req.params.filename); 
   if (!fs.existsSync(filePath)) {
     return res.status(404).send('Archivo no encontrado');
   }
-
   res.sendFile(filePath);
 });
 
