@@ -4,6 +4,8 @@ import cors from 'cors';
 import fs from 'fs';
 import dotenv from 'dotenv';
 import multer from 'multer';
+import { writeFileSync } from 'fs';
+import { v4 as uuidv4 } from 'uuid';
 
 dotenv.config();
 
@@ -11,16 +13,14 @@ const app = express();
 const HOST = process.env.HOST || 'http://localhost';
 const PORT = process.env.PORT || 3000;
 
-
-// Configura CORS (permite solo tu dominio Vue.js)
+// Configure CORS (allow only your Vue.js domain)
 app.use(cors({
   origin: 'http://localhost:5174',
   methods: ['GET', 'OPTIONS'],
   allowedHeaders: ['Content-Type', 'Authorization']
 }));
 
-
-// Permitir CORS para todos los orígenes (¡solo desarrollo!)
+// Allow CORS for all origins (development only!)
 /*app.use((req, res, next) => {
   res.header('Access-Control-Allow-Origin', '*');
   res.header('Access-Control-Allow-Methods', 'GET');
@@ -42,7 +42,7 @@ function createSymlink() {
       fs.symlinkSync(storageDir, publicStorageLink, 'junction');
       console.log('Enlace simbólico public/storage creado y apunta a storage');
     } else {
-      // Verificar si es un enlace simbólico y apunta correctamente
+      // Check if it is a symbolic link and points correctly
       const linkStat = fs.lstatSync(publicStorageLink);
       if (!linkStat.isSymbolicLink()) {
         console.warn('public/storage existe pero no es un symlink.');
@@ -95,15 +95,15 @@ app.get('/api/public-file/:filename', (req, res) => {
 });
 
 
-/*// Ruta para servir archivos desde una carpeta segura
+/*// Path to serve files from a secure folder
 app.get('/api/public-file/:path(*)', (req, res) => {
   const safePath = req.params.path;
-  const baseDir = path.join(__dirname, 'storage/app/public'); // Ajusta esta ruta
+  const baseDir = path.join(__dirname, 'storage/app/public'); // Adjust this route
   
-  // Construye la ruta absoluta del archivo
+  // Build the absolute path of the file
   const filePath = path.join(baseDir, safePath);
 
-  // Verifica que el archivo exista y esté dentro del directorio permitido
+  // Verify that the file exists and is within the allowed directory
   if (!filePath.startsWith(baseDir)) {
     return res.status(403).send('Acceso denegado');
   }
@@ -112,7 +112,7 @@ app.get('/api/public-file/:path(*)', (req, res) => {
     return res.status(404).send('Archivo no encontrado');
   }
 
-  // Envía el archivo con los headers adecuados
+  // Send the file with the appropriate headers
   res.sendFile(filePath, {
     headers: {
       'Content-Type': 'image/jpeg', //getMimeType(filePath),
@@ -121,7 +121,7 @@ app.get('/api/public-file/:path(*)', (req, res) => {
   });
 });*/
 
-// Función para determinar el tipo MIME (opcional)
+// Function to determine the MIME type (optional)
 /*function getMimeType(filePath: any) {
   const extname = path.extname(filePath).toLowerCase();
   const mimeTypes = {
@@ -135,7 +135,30 @@ app.get('/api/public-file/:path(*)', (req, res) => {
 }*/
 
 
+/*
+// Settings to increase the limit to 50MB (adjust as needed)
+app.use(express.json({ limit: '50mb' })); // Para JSON
+app.use(express.urlencoded({ limit: '50mb', extended: true })); // Para formularios
+*/
 
+app.post('/api/process-images', express.json({ limit: '50mb' }), (req, res) => {
+  console.log(req.body.images)
+  /*const savedPaths: string[] = [];
+  
+  req.body.images.forEach((base64Str: string) => {
+    const matches = base64Str.match(/^data:image\/(\w+);base64,(.+)$/);
+    if (!matches) return;
+    
+    const [_, ext, data] = matches;
+    const filename = `${uuidv4()}.${ext}`;
+    const path = `/storage/images/${filename}`;
+    
+    writeFileSync(`.${path}`, Buffer.from(data, 'base64'));
+    savedPaths.push(path);
+  });
+
+  res.json({ paths: savedPaths });*/
+});
 
 app.listen(PORT, () => {
   console.log(`Server listening on http://localhost:\${PORT}`);
