@@ -4,8 +4,8 @@ import cors from 'cors';
 import fs from 'fs';
 import dotenv from 'dotenv';
 import multer from 'multer';
-import { writeFileSync } from 'fs';
-import { v4 as uuidv4 } from 'uuid';
+import imageRouter from './endpoints'
+
 
 dotenv.config();
 
@@ -84,7 +84,6 @@ app.delete('/api/delete', (req, res) => {
 
 
 
-
 // Serving static files from 'public/images'
 app.get('/api/public-file/:filename', (req, res) => {
   const filePath = path.join(imagesDir, req.params.filename); 
@@ -141,24 +140,10 @@ app.use(express.json({ limit: '50mb' })); // Para JSON
 app.use(express.urlencoded({ limit: '50mb', extended: true })); // Para formularios
 */
 
-app.post('/api/process-images', express.json({ limit: '50mb' }), (req, res) => {
-  console.log(req.body.images)
-  /*const savedPaths: string[] = [];
-  
-  req.body.images.forEach((base64Str: string) => {
-    const matches = base64Str.match(/^data:image\/(\w+);base64,(.+)$/);
-    if (!matches) return;
-    
-    const [_, ext, data] = matches;
-    const filename = `${uuidv4()}.${ext}`;
-    const path = `/storage/images/${filename}`;
-    
-    writeFileSync(`.${path}`, Buffer.from(data, 'base64'));
-    savedPaths.push(path);
-  });
 
-  res.json({ paths: savedPaths });*/
-});
+
+app.use(imageRouter)
+
 
 app.listen(PORT, () => {
   console.log(`Server listening on http://localhost:\${PORT}`);
