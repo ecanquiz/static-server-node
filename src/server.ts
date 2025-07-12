@@ -27,7 +27,7 @@ app.use(cors({
   next();
 });*/
 
-const imagesDir = path.join(__dirname, '../public/images');
+const imagesDir = path.join(__dirname, '../public/storage/images/articles');
 const storageDir = path.join(__dirname, '../storage');
 const publicStorageLink = path.join(__dirname, '../public/storage');
 const upload = multer({ dest: 'uploads/' });
@@ -85,8 +85,9 @@ app.delete('/api/delete', (req, res) => {
 
 
 // Serving static files from 'public/images'
-app.get('/api/public-file/:filename', (req, res) => {
-  const filePath = path.join(imagesDir, req.params.filename); 
+app.get('/api/public-file/:articleId/:filename', (req, res) => {
+  const filePath = path.join(imagesDir, req.params.articleId.toString(), req.params.filename.toString());
+
   if (!fs.existsSync(filePath)) {
     return res.status(404).send('Archivo no encontrado');
   }
