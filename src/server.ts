@@ -6,7 +6,6 @@ import dotenv from 'dotenv';
 import multer from 'multer';
 import imageRouter from './endpoints'
 
-
 dotenv.config();
 
 const app = express();
@@ -82,8 +81,6 @@ app.delete('/api/delete', (req, res) => {
   res.send('Archivo eliminado exitosamente');
 });
 
-
-
 // Serving static files from 'public/images'
 app.get('/api/public-file/:articleId/:filename', (req, res) => {
   const filePath = path.join(imagesDir, req.params.articleId.toString(), req.params.filename.toString());
@@ -94,63 +91,10 @@ app.get('/api/public-file/:articleId/:filename', (req, res) => {
   res.sendFile(filePath);
 });
 
-
-/*// Path to serve files from a secure folder
-app.get('/api/public-file/:path(*)', (req, res) => {
-  const safePath = req.params.path;
-  const baseDir = path.join(__dirname, 'storage/app/public'); // Adjust this route
-  
-  // Build the absolute path of the file
-  const filePath = path.join(baseDir, safePath);
-
-  // Verify that the file exists and is within the allowed directory
-  if (!filePath.startsWith(baseDir)) {
-    return res.status(403).send('Acceso denegado');
-  }
-
-  if (!fs.existsSync(filePath)) {
-    return res.status(404).send('Archivo no encontrado');
-  }
-
-  // Send the file with the appropriate headers
-  res.sendFile(filePath, {
-    headers: {
-      'Content-Type': 'image/jpeg', //getMimeType(filePath),
-      'Cache-Control': 'public, max-age=86400' // Cache de 1 día
-    }
-  });
-});*/
-
-// Function to determine the MIME type (optional)
-/*function getMimeType(filePath: any) {
-  const extname = path.extname(filePath).toLowerCase();
-  const mimeTypes = {
-    '.jpg': 'image/jpeg',
-    '.jpeg': 'image/jpeg',
-    '.png': 'image/png',
-    '.gif': 'image/gif',
-    '.pdf': 'application/pdf'
-  };
-  return mimeTypes[extname] || 'application/octet-stream';
-}*/
-
-
-/*
-// Settings to increase the limit to 50MB (adjust as needed)
-app.use(express.json({ limit: '50mb' })); // Para JSON
-app.use(express.urlencoded({ limit: '50mb', extended: true })); // Para formularios
-*/
-
-
-
 app.use(imageRouter)
 
-
 app.listen(PORT, () => {
-  console.log(`Server listening on http://localhost:\${PORT}`);
-  console.log(`Serving static files in http://localhost:\${PORT}/images`);
-  console.log(`Serving storage in http://localhost:\${PORT}/storage`);
+  console.log(`Server listening on ${HOST}:${PORT}`);
+  console.log(`Serving static files in ${HOST}:${PORT}/images`);
+  console.log(`Serving storage in ${HOST}:${PORT}/storage`);
 });
-
-
-

@@ -2,24 +2,9 @@ import express, { Router } from "express";
 import fs, { writeFileSync } from 'fs';
 import path from 'path';
 import { v4 as uuidv4 } from 'uuid';
+import rebuildBase64 from './rebuildBase64';
 
 const imageRouter = Router()
-
-function rebuildBase64(compressed: string, mimeType = 'image/jpeg') {
-  // Revert URL-safe transformation
-  const base64 = compressed
-    .replace(/-/g, '+')
-    .replace(/_/g, '/');
-
-  // Add padding '=' if necessary (length multiple of 4)
-  const padLength = 4 - (base64.length % 4);
-  const paddedBase64 = base64 + '='.repeat(padLength % 4);
-
-  // Rebuild the complete Base64
-  const fullBase64 = `data:${mimeType};base64,${paddedBase64}`;
-
-  return fullBase64;
-}
 
 imageRouter.post('/api/articles/:articleId/process-images', express.json({ limit: '50mb' }), (req, res) => {
   // console.log(req.body.images)
@@ -31,7 +16,6 @@ imageRouter.post('/api/articles/:articleId/process-images', express.json({ limit
   if (fs.existsSync(imagesDir)) {
     fs.chmodSync(imagesDir, 0o777); // Give full permissions first
     fs.rmSync(imagesDir, { recursive: true, force: true });
-    console.log('borrando carpeta 57')
   }
 
   // Create folder with permissions 0777 (read/write for everyone)
@@ -54,7 +38,6 @@ imageRouter.post('/api/articles/:articleId/process-images', express.json({ limit
     const [_, ext, data] = matches;
     const filename = `${uuidv4()}.${ext}`;
 
-
     const path = `${dir}/${filename}`;
     
     writeFileSync(`.${path}`, Buffer.from(data, 'base64'));
@@ -67,3 +50,49 @@ imageRouter.post('/api/articles/:articleId/process-images', express.json({ limit
 });
 
 export default imageRouter;
+
+/*// Path to serve files from a secure folder
+app.get('/api/public-file/:path(*)', (req, res) => {
+  const safePath = req.params.path;
+  const baseDir = path.join(__dirname, 'storage/app/public'); // Adjust this route
+  
+  // Build the absolute path of the file
+  const filePath = path.join(baseDir, safePath);
+
+  // Verify that the file exists and is within the allowed directory
+  if (!filePath.startsWith(baseDir)) {
+    return res.status(403).send('Acceso denegado');
+  }
+
+  if (!fs.existsSync(filePath)) {
+    return res.status(404).send('Archivo no encontrado');
+  }
+
+  // Send the file with the appropriate headers
+  res.sendFile(filePath, {
+    headers: {
+      'Content-Type': 'image/jpeg', //getMimeType(filePath),
+      'Cache-Control': 'public, max-age=86400' // Cache de 1 día
+    }
+  });
+});*/
+
+// Function to determine the MIME type (optional)
+/*function getMimeType(filePath: any) {
+  const extname = path.extname(filePath).toLowerCase();
+  const mimeTypes = {
+    '.jpg': 'image/jpeg',
+    '.jpeg': 'image/jpeg',
+    '.png': 'image/png',
+    '.gif': 'image/gif',
+    '.pdf': 'application/pdf'
+  };
+  return mimeTypes[extname] || 'application/octet-stream';
+}*/
+
+
+/*
+// Settings to increase the limit to 50MB (adjust as needed)
+app.use(express.json({ limit: '50mb' })); // Para JSON
+app.use(express.urlencoded({ limit: '50mb', extended: true })); // Para formularios
+*/
