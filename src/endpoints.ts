@@ -3,10 +3,15 @@ import fs, { writeFileSync } from 'fs';
 import path from 'path';
 import { v4 as uuidv4 } from 'uuid';
 import { rebuildBase64 } from './base64';
+import validateSharedToken from "./middlewares/validateSharedToken";
 
 const imageRouter = Router()
 
-imageRouter.post('/api/articles/:articleId/process-images', express.json({ limit: '50mb' }), (req, res) => {
+imageRouter.post(
+    '/api/articles/:articleId/process-images',
+    validateSharedToken,
+    express.json({ limit: '50mb' }    
+  ), (req, res) => {
   // console.log(req.body.images)
   const imageNames: string[] = [];
   const dir = `/storage/images/articles/${req.params.articleId}`;
@@ -96,3 +101,27 @@ app.get('/api/public-file/:path(*)', (req, res) => {
 app.use(express.json({ limit: '50mb' })); // Para JSON
 app.use(express.urlencoded({ limit: '50mb', extended: true })); // Para formularios
 */
+
+
+/*
+Custom Request Types
+
+If your endpoints receive bodies with a specific structure, you can create interfaces:
+
+interface ApiRequest<T = any> extends Request {
+    body: T;
+    // Puedes añadir otras propiedades personalizadas aquí si las usas
+}
+
+// Ejemplo de uso con un tipo específico para el body
+interface MyPayload {
+    payload: string;
+    userId?: number;
+}
+
+const myHandler = (req: ApiRequest<MyPayload>, res: Response, next: NextFunction) => {
+    // req.body ahora está tipado como MyPayload
+    console.log(req.body.payload); // string
+    console.log(req.body.userId);  // number | undefined
+};
+ */
