@@ -2,13 +2,13 @@ import express, { Router } from "express";
 import fs, { writeFileSync } from 'fs';
 import path from 'path';
 import { v4 as uuidv4 } from 'uuid';
-import rebuildBase64 from './rebuildBase64';
+import { rebuildBase64 } from './base64';
 
 const imageRouter = Router()
 
 imageRouter.post('/api/articles/:articleId/process-images', express.json({ limit: '50mb' }), (req, res) => {
   // console.log(req.body.images)
-  const savedPaths: string[] = [];
+  const imageNames: string[] = [];
   const dir = `/storage/images/articles/${req.params.articleId}`;
   const imagesDir = path.join(__dirname, `../${dir}`);
 
@@ -42,11 +42,11 @@ imageRouter.post('/api/articles/:articleId/process-images', express.json({ limit
     
     writeFileSync(`.${path}`, Buffer.from(data, 'base64'));
 
-    savedPaths.push(filename);
+    imageNames.push(filename);
 
   });
 
-  res.json({ paths: savedPaths });
+  res.json({ imageNames });
 });
 
 export default imageRouter;
