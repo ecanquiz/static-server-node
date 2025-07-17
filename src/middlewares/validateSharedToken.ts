@@ -1,4 +1,3 @@
-
 import { Request, Response, NextFunction } from 'express';
 
 interface ErrorResponse {
@@ -12,74 +11,44 @@ export default function(
     next: NextFunction
 ): Response<ErrorResponse> | void  {
     try {
-        const sharedToken = process.env.API_SHARED_TOKEN;
+        const sharedTokens = process.env.API_SHARED_TOKENS;
+        if (!sharedTokens) { 
+            console.error('API_SHARED_TOKENS is not configured');
+            return res.status(500).json({ error: 'Server misconfiguration' });
+        }
+        const tokens: Record<string, string> = JSON.parse(sharedTokens);
 
-        if (!sharedToken) {
-            throw new Error('Server misconfiguration');
+        const client = req.headers['x-client-name'];
+        if (!client) {
+            return res.status(400).json({
+                error: 'Client identifier missing',
+                details: 'Include x-client-name header'
+            });
+        }
+
+        if (typeof client !== 'string' || !(client in tokens)) {
+            return res.status(401).json({ error: 'Unknown client' });
         }
         
-        const authHeader = req.headers['authorization'];
-        if (!authHeader) {
+        const auth = req.headers['authorization'];
+        if (!auth) {
             return res.status(401).json({ error: 'Authorization header missing' });
         }
-        
-        const [bearer, token] = authHeader.split(' ');
+        const [bearer, token] = auth.split(' ');
         if (bearer !== 'Bearer' || !token) {
-            return res.status(401).json({ error: 'Invalid authorization format' });
+            return res.status(401).json({
+                error: 'Invalid authorization format',
+                details: 'Expected: Bearer <token>' 
+            });
+        }
+
+        if (token !== tokens[client]) {
+            return res.status(401).json({ error: 'Invalid token for this client' });
         }
         
-        if (token !== sharedToken) {
-            return res.status(401).json({ error: 'Invalid token' });
-        }
-        
-        next();
+        return next();
     } catch (error) {
         console.error('Authentication error:', error);
         return res.status(500).json({ error: 'Internal server error' });
     }
 };
-
-/*
-import { Request, Response, NextFunction } from 'express';
-
-interface ErrorResponse {
-    error: string;
-    details?: string;
-}
-
-const validateSharedToken = (
-    req: Request,
-    res: Response<ErrorResponse>,
-    next: NextFunction
-): Response<ErrorResponse> | void => {
-    const sharedToken = process.env.API_SHARED_TOKEN;
-    
-    if (!sharedToken) {
-        console.error('API_SHARED_TOKEN no está configurado');
-        return res.status(500).json({ error: 'Server misconfiguration' });
-    }
-
-    const authHeader = req.headers['authorization'];
-    
-    if (!authHeader) {
-        return res.status(401).json({ error: 'Authorization header missing' });
-    }
-    
-    if (!authHeader.startsWith('Bearer ')) {
-        return res.status(401).json({ 
-            error: 'Invalid authorization format',
-            details: 'Expected: Bearer <token>' 
-        });
-    }
-    
-    const token = authHeader.split(' ')[1];
-    
-    if (token !== sharedToken) {
-        return res.status(401).json({ error: 'Invalid token' });
-    }
-    
-    return next();
-};
-
-export default validateSharedToken;
-*/
