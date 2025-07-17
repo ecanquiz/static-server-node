@@ -2,8 +2,8 @@ import express, { Router } from "express";
 import fs, { writeFileSync } from 'fs';
 import path from 'path';
 import { v4 as uuidv4 } from 'uuid';
-import { rebuildBase64 } from './base64';
-import validateSharedToken from "./middlewares/validateSharedToken";
+import { rebuildBase64 } from '../utils/base64';
+import validateSharedToken from "../middlewares/validateSharedToken";
 
 const imageRouter = Router()
 
