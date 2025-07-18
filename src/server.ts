@@ -1,16 +1,16 @@
 import express from 'express';
 import path from 'path';
 import cors from 'cors';
-import fs from 'fs';
 import dotenv from 'dotenv';
 import multer from 'multer';
-import imageRouter from './endpoints'
+import createSymlink from './utils/createSymlink'
+import publicFileRoutes from './routes/publicFileRoutes'
+import processImagesRoutes from './routes/processImagesRoutes'
+
 
 dotenv.config();
 
 const app = express();
-const HOST = process.env.HOST || 'http://localhost';
-const PORT = process.env.PORT || 3000;
 
 // Configure CORS (allow only your Vue.js domain)
 app.use(cors({
@@ -31,28 +31,7 @@ const storageDir = path.join(__dirname, '../storage');
 const publicStorageLink = path.join(__dirname, '../public/storage');
 const upload = multer({ dest: 'uploads/' });
 
-function createSymlink() {
-  try {
-    if (!fs.existsSync(storageDir)) {
-      fs.mkdirSync(storageDir, { recursive: true });
-      console.log('Se creó la carpeta storage');
-    }
-    if (!fs.existsSync(publicStorageLink)) {
-      fs.symlinkSync(storageDir, publicStorageLink, 'junction');
-      console.log('Enlace simbólico public/storage creado y apunta a storage');
-    } else {
-      // Check if it is a symbolic link and points correctly
-      const linkStat = fs.lstatSync(publicStorageLink);
-      if (!linkStat.isSymbolicLink()) {
-        console.warn('public/storage existe pero no es un symlink.');
-      }
-    }
-  } catch (err) {
-    console.error('Error al crear enlace simbólico:', err);
-  }
-}
-
-createSymlink();
+createSymlink( storageDir, publicStorageLink );
 
 app.use('/images', express.static(imagesDir));
 app.use('/storage', express.static(publicStorageLink));
@@ -81,20 +60,7 @@ app.delete('/api/delete', (req, res) => {
   res.send('Archivo eliminado exitosamente');
 });
 
-// Serving static files from 'public/images'
-app.get('/api/public-file/:articleId/:filename', (req, res) => {
-  const filePath = path.join(imagesDir, req.params.articleId.toString(), req.params.filename.toString());
+app.use(publicFileRoutes);
+app.use(processImagesRoutes);
 
-  if (!fs.existsSync(filePath)) {
-    return res.status(404).send('Archivo no encontrado');
-  }
-  res.sendFile(filePath);
-});
-
-app.use(imageRouter)
-
-app.listen(PORT, () => {
-  console.log(`Server listening on ${HOST}:${PORT}`);
-  console.log(`Serving static files in ${HOST}:${PORT}/images`);
-  console.log(`Serving storage in ${HOST}:${PORT}/storage`);
-});
+export default app;
