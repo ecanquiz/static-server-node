@@ -18,8 +18,8 @@ export default (output: string, path: string) => {
 
   isNotExistCreateIt(output, pathTemp)
   arr.forEach(p => {
-      pathTemp += `/${p}`
-      isNotExistCreateIt(output, pathTemp)
+    pathTemp += `/${p}`
+    isNotExistCreateIt(output, pathTemp)
   })
 
   return `${output}/${pathTemp}`

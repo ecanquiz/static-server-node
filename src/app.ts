@@ -1,4 +1,3 @@
-// src/app.ts (punto de entrada)
 import app from './server';
 
 const HOST = process.env.HOST || 'http://localhost';

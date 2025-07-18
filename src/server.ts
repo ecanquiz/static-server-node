@@ -60,9 +60,7 @@ app.delete('/api/delete', (req, res) => {
   res.send('Archivo eliminado exitosamente');
 });
 
-
 app.use(publicFileRoutes);
 app.use(processImagesRoutes);
-
 
 export default app;
