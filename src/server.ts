@@ -7,14 +7,19 @@ import createSymlink from './utils/createSymlink'
 import publicFileRoutes from './routes/publicFileRoutes'
 import processImagesRoutes from './routes/processImagesRoutes'
 
-
 dotenv.config();
 
 const app = express();
 
 // Configure CORS (allow only your Vue.js domain)
+const allowedOrigins = process.env.API_ALLOWED_ORIGINS;
+if (!allowedOrigins) { 
+  console.error('API_ALLOWED_ORIGINS is not configured');
+  throw new Error('Server misconfiguration');
+}
+const origins: string[] = JSON.parse(allowedOrigins);
 app.use(cors({
-  origin: 'http://localhost:5174',
+  origin: origins,
   methods: ['GET', 'OPTIONS'],
   allowedHeaders: ['Content-Type', 'Authorization']
 }));
