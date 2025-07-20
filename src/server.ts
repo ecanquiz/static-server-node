@@ -3,6 +3,7 @@ import path from 'path';
 import cors from 'cors';
 import dotenv from 'dotenv';
 import multer from 'multer';
+import { apiAllowedOrigins } from './config';
 import createSymlink from './utils/createSymlink'
 import publicFileRoutes from './routes/publicFileRoutes'
 import processImagesRoutes from './routes/processImagesRoutes'
@@ -12,7 +13,7 @@ dotenv.config();
 const app = express();
 
 // Configure CORS (allow only your Vue.js domain)
-const allowedOrigins = process.env.API_ALLOWED_ORIGINS;
+const allowedOrigins = apiAllowedOrigins;
 if (!allowedOrigins) { 
   console.error('API_ALLOWED_ORIGINS is not configured');
   throw new Error('Server misconfiguration');
