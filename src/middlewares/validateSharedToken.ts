@@ -1,4 +1,5 @@
 import type { Request, Response, NextFunction } from 'express';
+import { apiSharedTokens } from '../config';
 
 interface ErrorResponse {
   error: string;
@@ -11,7 +12,7 @@ export default function(
   next: NextFunction
 ): Response<ErrorResponse> | void  {
   try {
-    const sharedTokens = process.env.API_SHARED_TOKENS;
+    const sharedTokens = apiSharedTokens;
     if (!sharedTokens) { 
       console.error('API_SHARED_TOKENS is not configured');
       return res.status(500).json({ error: 'Server misconfiguration' });

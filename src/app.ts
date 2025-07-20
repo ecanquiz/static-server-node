@@ -1,10 +1,8 @@
 import app from './server';
+import {host, port} from './config';
 
-const HOST = process.env.HOST || 'http://localhost';
-const PORT = process.env.PORT || 3000;
-
-app.listen(PORT, () => {
-  console.log(`Server listening on ${HOST}:${PORT}`);
-  console.log(`Serving static files in ${HOST}:${PORT}/images`);
-  console.log(`Serving storage in ${HOST}:${PORT}/storage`);
+app.listen(port, () => {
+  console.log(`Server listening on ${host}:${port}`);
+  console.log(`Serving static files in ${host}:${port}/images`);
+  console.log(`Serving storage in ${host}:${port}/storage`);
 });
