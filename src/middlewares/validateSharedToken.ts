@@ -12,12 +12,7 @@ export default function(
   next: NextFunction
 ): Response<ErrorResponse> | void  {
   try {
-    const sharedTokens = apiSharedTokens;
-    if (!sharedTokens) { 
-      console.error('API_SHARED_TOKENS is not configured');
-      return res.status(500).json({ error: 'Server misconfiguration' });
-    }
-    const tokens: Record<string, string> = JSON.parse(sharedTokens);
+    const tokens: Record<string, string> = JSON.parse(apiSharedTokens);
 
     const client = req.headers['x-client-name'];
     if (!client) {
