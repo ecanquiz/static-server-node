@@ -15,7 +15,7 @@ router.post(
   // console.log(req.body.images)
   const imageNames: string[] = [];
   const dir = `/storage/images/articles/${req.params.articleId}`;
-  const imagesDir = path.join(__dirname, `../${dir}`);
+  const imagesDir = path.join(__dirname, `../../${dir}`);
 
   // Delete folder if it exists
   if (fs.existsSync(imagesDir)) {
