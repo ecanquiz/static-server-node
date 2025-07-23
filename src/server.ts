@@ -1,7 +1,6 @@
 import express from 'express';
 import path from 'path';
 import cors from 'cors';
-import multer from 'multer';
 import { apiAllowedOrigins } from './config';
 import createSymlink from './utils/createSymlink'
 import publicFileRoutes from './routes/publicFileRoutes'
@@ -26,7 +25,6 @@ app.use(cors({
 const imagesDir = path.join(__dirname, '../public/storage/images/articles');
 const storageDir = path.join(__dirname, '../storage');
 const publicStorageLink = path.join(__dirname, '../public/storage');
-const upload = multer({ dest: 'uploads/' });
 
 createSymlink( storageDir, publicStorageLink );
 
@@ -45,16 +43,6 @@ app.get('/', (req, res) => {
     <p>To access images, visit: <a href="/images">/images</a></p>
     <p>To access storage files, visit: <a href="/storage">/storage</a></p>
   `);
-});
-
-app.post('/api/upload', upload.single('file'), (req, res) => {
-  res.send('Archivo subido exitosamente');
-});
-
-app.delete('/api/delete', (req, res) => {
-  const filename = req.body.filename;
-  // Logic for deleting the file
-  res.send('Archivo eliminado exitosamente');
 });
 
 app.use(publicFileRoutes);
