@@ -10,7 +10,7 @@ const router = Router()
 router.post(
   '/api/articles/:articleId/process-images',
   validateSharedToken,
-  express.json({ limit: '50mb' } // express.urlencoded({ limit: '50mb', extended: true }) Para formularios
+  express.json({ limit: '50mb' } // express.urlencoded({ limit: '50mb', extended: true }) For forms
 ), (req, res) => {
   // console.log(req.body.images)
   const imageNames: string[] = [];
