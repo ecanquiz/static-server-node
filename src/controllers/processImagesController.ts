@@ -1,18 +1,12 @@
-import express, { Router } from "express";
+import { Request, Response } from 'express';
 import fs from 'fs';
 import path from 'path';
 import { rebuildBase64 } from '../utils/base64';
 import writeFilesToDisk from '../utils/writeFilesToDisk';
-import validateSharedToken from "../middlewares/validateSharedToken";
 
-const router = Router()
-
-router.post(
-  '/api/articles/:articleId/process-images',
-  validateSharedToken,
-  express.json({ limit: '50mb' } // express.urlencoded({ limit: '50mb', extended: true }) For forms
-), (req, res) => {
-  // console.log(req.body.images)
+export const processImages = async (req: Request, res: Response) => {
+  try {
+    // console.log(req.body.images)
   const imageNames: string[] = [];
   const dir = `/storage/images/articles/${req.params.articleId}`;
   const imagesDir = path.join(__dirname, `../../${dir}`);
@@ -41,6 +35,9 @@ router.post(
   });
 
   res.json({ imageNames });
-});
-
-export default router;
+    
+  } catch (error) {
+    console.log(error)
+    res.status(500).json({ error: 'Internal server error' });
+  }
+};
