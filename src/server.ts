@@ -3,8 +3,7 @@ import path from 'path';
 import cors from 'cors';
 import { apiAllowedOrigins } from './config';
 import createSymlink from './utils/createSymlink'
-import publicFileRoutes from './routes/publicFileRoutes'
-import processImagesRoutes from './routes/processImagesRoutes'
+import apiRoutes from './routes/apiRoutes'
 
 const app = express();
 
@@ -45,7 +44,6 @@ app.get('/', (req, res) => {
   `);
 });
 
-app.use(publicFileRoutes);
-app.use(processImagesRoutes);
+app.use(apiRoutes);
 
 export default app;
