@@ -1,15 +1,15 @@
 {
   "name": "static-server-node",
   "version": "1.0.0",
-  "description": "Servidor estático simple con Node.js, Express y TypeScript",
+  "description": "Simple static server with Node.js, Express, and TypeScript",
   "main": "dist/app.js",
   "scripts": {
     "test": "vitest",
     "test:watch": "vitest watch",
     "test:coverage": "vitest run --coverage",
     "build": "tsc",
-    "start": "node dist/app.js",
-    "dev": "ts-node src/app.ts",
+    "start": "NODE_ENV=production node dist/app.js",
+    "dev": "NODE_ENV=development ts-node src/app.ts",
     "clean": "rm -rf dist/*"
   },
   "author": "",
@@ -18,12 +18,14 @@
     "cors": "^2.8.5",
     "dotenv": "^16.5.0",
     "express": "^4.21.2",
+    "module-alias": "^2.2.3",
     "path": "^0.12.7",
     "uuid": "^11.1.0"
   },
   "devDependencies": {
     "@types/cors": "^2.8.19",
     "@types/express": "^4.17.17",
+    "@types/module-alias": "^2.0.4",
     "@types/node": "^20.19.9",
     "@types/supertest": "^6.0.3",
     "@vitest/coverage-v8": "^3.2.4",
@@ -31,5 +33,6 @@
     "ts-node": "^10.9.1",
     "typescript": "^5.1.6",
     "vitest": "^3.2.4"
-  }
+  },
+  "_moduleAliases": { "@": "dist" }
 }

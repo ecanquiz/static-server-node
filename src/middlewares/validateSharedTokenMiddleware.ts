@@ -1,5 +1,5 @@
 import type { Request, Response, NextFunction } from 'express';
-import { apiSharedTokens } from '../config';
+import { apiSharedTokens } from '@config/index';
 
 interface ErrorResponse {
   error: string;

@@ -1,8 +1,8 @@
 import { Request, Response } from 'express';
 import fs from 'fs';
 import path from 'path';
-import { rebuildBase64 } from '../utils/base64';
-import writeFilesToDisk from '../utils/writeFilesToDisk';
+import { rebuildBase64 } from '@utils/base64';
+import writeFilesToDisk from '@utils/writeFilesToDisk';
 
 export const processImages = async (req: Request, res: Response) => {
   try {
