@@ -4,12 +4,27 @@
       "module": "CommonJS",
       "outDir": "dist",
       "rootDir": "src",
+      "baseUrl": "./",
+      "paths": {
+        "@/*": ["src/*", "dist/*"],
+        "@config/*": ["src/config/*"],
+        "@controllers/*": ["src/controllers/*"],
+        "@middlewares/*": ["src/middlewares/*"],
+        "@routes/*": ["src/routes/*"],
+        "@utils/*": ["src/utils/*"],
+        "@public/*": ["public/*"]
+      },
       "strict": true,
       "esModuleInterop": true,
       "forceConsistentCasingInFileNames": true,
       "skipLibCheck": true
-    },
-    
+    },    
     "include": ["src/**/*"],
-    "exclude": ["node_modules"]
+    "exclude": [
+      "node_modules",
+      "**/__tests__",
+      "**/__mocks__",
+      "**/*.test.ts",
+      "**/*.spec.ts"
+    ]
 }

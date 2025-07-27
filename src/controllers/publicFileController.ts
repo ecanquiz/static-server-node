@@ -1,7 +1,7 @@
 import { Request, Response } from 'express';
 import path from 'path';
 import fs from 'fs';
-import getMimeType from "../utils/getMimeType";
+import getMimeType from "@utils/getMimeType";
 
 const imagesDir = path.join(__dirname, '../../public/storage/images/articles');
 

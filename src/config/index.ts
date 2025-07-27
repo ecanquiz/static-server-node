@@ -22,3 +22,4 @@ export const host = process.env.HOST;
 export const port = process.env.PORT;
 export const apiAllowedOrigins = process.env.API_ALLOWED_ORIGINS
 export const apiSharedTokens = process.env.API_SHARED_TOKENS
+export { mainScreen } from './characterStrings'
