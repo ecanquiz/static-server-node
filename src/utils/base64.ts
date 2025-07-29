@@ -13,9 +13,20 @@
    * }
    */
 
-export const isBase64 = function(str: string) {
+/*export const isBase64 = function(str: string) {
   const regex = /^[A-Za-z0-9+/]*={0,2}$/;
   return regex.test(str);
+}*/
+
+export const isBase64 = function(str: string) {
+  // Verify that it is a string
+  if (typeof str !== 'string') return false;
+  
+  // Length must be a multiple of 4
+  if (str.length % 4 !== 0) return false;
+  
+  // Improved Regex
+  return /^([A-Za-z0-9+/]{4})*([A-Za-z0-9+/]{3}=|[A-Za-z0-9+/]{2}==)?$/.test(str);
 }
 
 export const isValidBase64 = function(str: string) {
@@ -28,7 +39,17 @@ export const isValidBase64 = function(str: string) {
   }
 }
 
-export const validateBase64 = function(data: string) {
+/*export const isValidBase64 = function(str: string) {
+  if (typeof str !== 'string') return false;
+  
+  try {
+    return Buffer.from(str, 'base64').toString('base64') === str;
+  } catch (e) {
+    return false;
+  }
+}*/
+
+/*export const validateBase64 = function(data: string) {
   const base64Regex = /^data:image\/[a-zA-Z]+;base64,(.+)$/;
   const match = data.match(base64Regex);
   if (match) {
@@ -37,6 +58,24 @@ export const validateBase64 = function(data: string) {
   }
   return false;
 }
+*/
+
+
+export const validateBase64 = function(data: string) {
+  if (typeof data !== 'string') return false;
+  
+  // Regex más estricto para tipos MIME de imagen
+  const base64Regex = /^data:image\/(png|jpeg|jpg|gif|webp);base64,([a-zA-Z0-9+/]+={0,2})$/;
+  const match = data.match(base64Regex);
+  
+  if (!match) return false;
+  
+  const base64String = match[2];
+  return isBase64(base64String) && isValidBase64(base64String);
+}
+
+
+
 
   /**
  * Base64 compression (lossless of quality)
