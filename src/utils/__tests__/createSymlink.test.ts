@@ -23,10 +23,10 @@ afterEach(() => {
 })
 
 describe('createSymlink', () => {
-  it('Should create the storage directory if it doesnt exist.', async () => {
-    const storageDir = '/storage'
-    const publicLink = '/public/storage'
+  const storageDir = '/storage'
+  const publicLink = '/public/storage'
 
+  it('Should create the storage directory if it doesnt exist.', async () => {
     createSymlink(storageDir, publicLink)
 
     // Verify that the directory was created
@@ -35,9 +35,6 @@ describe('createSymlink', () => {
   })
 
   it('Should create the symlink if it does not exist - way 1.', async () => {
-    const storageDir = '/storage'
-    const publicLink = '/public/storage'
-
     // Mock filesystem with basic structure
     mockFs({
       [storageDir]: {}, // Source directory exists
@@ -70,9 +67,6 @@ describe('createSymlink', () => {
   })
 
   it('Should create the symlink if it does not exist - way 2.', () => {
-    const storageDir = '/storage';
-    const publicLink = '/public/storage';
-
     // 1. Configure all necessary mocks
     vi.spyOn(fs, 'existsSync')
       .mockImplementation((path) => path === storageDir);
@@ -102,9 +96,6 @@ describe('createSymlink', () => {
   });
 
   it('Should warn if public/storage exists but is not a symlink.', async () => {
-    const storageDir = '/storage'
-    const publicLink = '/public/storage'
-
     // Simulate regular file (no symlink)
     mockFs({
       [storageDir]: {},
@@ -112,17 +103,17 @@ describe('createSymlink', () => {
     })
 
     createSymlink(storageDir, publicLink)
+    const stats = fs.lstatSync(publicLink)
 
     expect(console.warn).toHaveBeenCalledWith(
       'public/storage exists but is not a symlink.'
     )
+    expect(stats.isSymbolicLink()).toBe(false)
+    expect(stats.isFile()).toBe(true)
   })
 
-  it('Should handle errors appropriately', async () => {
-    const storageDir = '/storage'
-    const publicLink = '/public/storage'
-
-    // Error de Forzar en symlinkSync
+  it('Should handle errors appropriately', async () => {    
+    // Force Error in symlinkSync
     vi.spyOn(fs, 'symlinkSync').mockImplementation(() => {
       throw new Error('Mocked error')
     })
