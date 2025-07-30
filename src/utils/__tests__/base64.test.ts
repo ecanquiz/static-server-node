@@ -1,19 +1,39 @@
 import { describe, it, expect, vi } from 'vitest';
 import { isBase64, isValidBase64, validateBase64 } from '../base64';
 
+const validCases = [
+  'SGVsbG8gd29ybGQ=', // "Hello world"
+  'Zm9vYmFy', // "foobar"
+  'AQIDBAU=', // Binary data
+  'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9', // JWT header
+  'dGVzdA==', // "test" with padding
+  'YW55IGNhcm5hbCBwbGVhc3VyZS4=', // "any carnal pleasure."
+  '', // Empty string
+];
+
+const invalidCases = [
+  'Hello world', // Text normal
+  'SGVsbG8gd29ybGQ', // Missing padding
+  'SGVsbG8gd29ybGQ===', // Excessive padding
+  'SGVsbG8gd29ybGQ!', // Invalid character (!)
+  'U3VwZXI=U3VwZXI=', // Multiple parts
+  'AB\0CD', // Null character
+  'AB\tCD', // Tabulator
+  'AB\nCD', // New line
+  'AB CD', // Space
+  'ÁB==', // Accentuated character
+];
+
+const edgeCases = [
+  123, // No-string input
+  null,
+  undefined,
+  {}
+];
+
 describe('isBase64', () => {
   // Valid cases
   it('should return true for valid Base64 strings', () => {
-    const validCases = [
-      'SGVsbG8gd29ybGQ=', // "Hello world"
-      'Zm9vYmFy', // "foobar"
-      'AQIDBAU=', // Binary data
-      'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9', // JWT header
-      'dGVzdA==', // "test" with padding
-      'YW55IGNhcm5hbCBwbGVhc3VyZS4=', // "any carnal pleasure."
-      '', // Empty string
-    ];
-
     validCases.forEach((testCase) => {
       expect(isBase64(testCase)).toBe(true);
     });
@@ -21,19 +41,6 @@ describe('isBase64', () => {
 
   // Invalid cases
   it('should return false for invalid Base64 strings', () => {
-    const invalidCases = [
-      'Hello world', // Text normal
-      'SGVsbG8gd29ybGQ', // Missing padding
-      'SGVsbG8gd29ybGQ===', // Excessive padding
-      'SGVsbG8gd29ybGQ!', // Invalid character (!)
-      'U3VwZXI=U3VwZXI=', // Multiple parts
-      'AB\0CD', // Null character
-      'AB\tCD', // Tabulator
-      'AB\nCD', // New line
-      'AB CD', // Space
-      'ÁB==', // Accentuated character
-    ];
-
     invalidCases.forEach((testCase) => {
       expect(isBase64(testCase)).toBe(false);
     });
@@ -41,10 +48,10 @@ describe('isBase64', () => {
 
   // Special cases
   it('should handle edge cases', () => {
-    expect(isBase64(123 as any)).toBe(false); // No-string input
-    expect(isBase64(null as any)).toBe(false);
-    expect(isBase64(undefined as any)).toBe(false);
-    expect(isBase64({} as any)).toBe(false);
+    expect(isBase64('')).toBe(true); // Empty string is technically valid
+    edgeCases.forEach((testCase) => {
+      expect(isBase64(testCase as any)).toBe(false);
+    });
   });
 
   // Base64 edge cases
@@ -68,15 +75,6 @@ describe('isBase64', () => {
 describe('isValidBase64', () => {
   // Standard valid cases
   it('should return true for valid Base64 strings', () => {
-    const validCases = [
-      'SGVsbG8gd29ybGQ=', // "Hello world"
-      'Zm9vYmFy', // "foobar"
-      'AQIDBAU=', // Binary data
-      'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9', // JWT header
-      'dGVzdA==', // "test" with padding
-      'YW55IGNhcm5hbCBwbGVhc3VyZS4=', // "any carnal pleasure."
-    ];
-
     validCases.forEach((testCase) => {
       expect(isValidBase64(testCase)).toBe(true);
     });
@@ -84,16 +82,6 @@ describe('isValidBase64', () => {
 
   // Invalid cases
   it('should return false for invalid Base64 strings', () => {
-    const invalidCases = [
-      'Hello world', // Normal texto
-      'SGVsbG8gd29ybGQ', // Missing padding
-      'SGVsbG8gd29ybGQ===', // Excessive padding
-      'SGVsbG8gd29ybGQ!', // Invalid character (!)
-      'U3VwZXI=U3VwZXI=', // Multiple parts
-      'AB\0CD', // Null character
-      'ÁB==', // Accentuated character
-    ];
-
     invalidCases.forEach((testCase) => {
       expect(isValidBase64(testCase)).toBe(false);
     });
@@ -102,10 +90,9 @@ describe('isValidBase64', () => {
   // Special cases
   it('should handle edge cases', () => {
     expect(isValidBase64('')).toBe(true); // Empty string is technically valid
-    expect(isValidBase64(123 as any)).toBe(false); // No-string input
-    expect(isValidBase64(null as any)).toBe(false);
-    expect(isValidBase64(undefined as any)).toBe(false);
-    expect(isValidBase64({} as any)).toBe(false);
+    edgeCases.forEach((testCase) => {
+      expect(isValidBase64(testCase as any)).toBe(false);
+    });
   });
 
   // Cases with Unicode
