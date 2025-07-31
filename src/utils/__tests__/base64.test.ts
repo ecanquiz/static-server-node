@@ -1,5 +1,5 @@
 import { describe, it, expect, vi } from 'vitest';
-import { isBase64, isValidBase64, validateBase64 } from '../base64';
+import { isBase64, isValidBase64, validateBase64, compressBase64, rebuildBase64 } from '../base64';
 
 const validCases = [
   'SGVsbG8gd29ybGQ=', // "Hello world"
@@ -175,4 +175,122 @@ describe('validateBase64', () => {
     // MIME type with additional parameters
     expect(validateBase64('data:image/png;param=value;base64,iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAYAAAAfFcSJAAAADUlEQVR42mP8z/C/HgAGgwJ/lK3Q6wAAAABJRU5ErkJggg==')).toBe(false);
   });
+});
+
+
+
+describe('compressBase64', () => {
+  //Standard cases
+  it('should remove metadata prefix and convert characters', () => {
+    const input = 'data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAYAAAAfFcSJAAAADUlEQVR42mP8z/C/HgAGgwJ/lK3Q6wAAAABJRU5ErkJggg==';
+    const expected = 'iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAYAAAAfFcSJAAAADUlEQVR42mP8z_C_HgAGgwJ_lK3Q6wAAAABJRU5ErkJggg';
+    expect(compressBase64(input)).toBe(expected);
+  });
+
+  it('should correctly replace all special characters', () => {
+    const input = 'data:text/plain;base64,a+b/c+d/e==';
+    const expected = 'a-b_c-d_e';
+    expect(compressBase64(input)).toBe(expected);
+  });
+  
+  // Cases with different MIME types
+  it('should handle various MIME types', () => {
+    const cases = [{
+      input: 'data:image/jpeg;base64,/9j/4AAQSkZJRg...', 
+      expected: '_9j_4AAQSkZJRg...' // JPEG Case (the one you already have)
+    }, {
+      input: 'data:application/json;base64,eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9',
+      expected: 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9' // Alternative simple case (no problematic characters)
+    }, {
+      input: 'data:application/pdf;base64,SimplePDF',
+      expected: 'SimplePDF' // Simple case for PDF
+    }];
+
+    cases.forEach(({ input, expected }) => {
+      expect(compressBase64(input)).toBe(expected);
+    });
+  });
+  
+  // URL-safe transformation cases
+  it('should convert to URL-safe Base64', () => {
+    const input = 'data:text/plain;base64,SGVsbG8gV29ybGQh+/==';
+    const expected = 'SGVsbG8gV29ybGQh-_';
+    expect(compressBase64(input)).toBe(expected);
+  });
+
+  it('should handle edge cases', () => {
+    // Empty string (prefix only)
+    expect(compressBase64('data:text/plain;base64,')).toBe('');
+  
+    // Padding only (you must completely remove the prefix and the =)
+    expect(compressBase64('data:application/octet-stream;base64,===')).toBe('');
+  
+    // Special characters (must convert + to - and / to _)
+    expect(compressBase64('data:text/plain;base64,/+/+/+/+==')).toBe('_-_-_-_-');
+  });
+
+  // Casos inválidos (deberían fallar o comportarse específicamente)
+  it('should handle invalid inputs gracefully', () => {
+    // 1. Sin prefijo - devuelve el string original
+    expect(compressBase64('SGVsbG8gV29ybGQh')).toBe('SGVsbG8gV29ybGQh');
+  
+    // 2. Prefijo mal formado (con : en lugar de ,)
+    expect(compressBase64('data:image/png;base64:')).toBe('');
+  
+    // 3. Prefijo parcialmente correcto
+    expect(compressBase64('data:image/png;base64=')).toBe('');
+  
+    // 4. Valores no string
+    expect(compressBase64(null as any)).toBe('');
+    expect(compressBase64(undefined as any)).toBe('');
+    expect(compressBase64(123 as any)).toBe('');
+  
+    // 5. String vacío
+    expect(compressBase64('')).toBe('');
+    expect(compressBase64('data:image/png;base64')).toBe('');
+    expect(compressBase64('data:image/png;base64,')).toBe(''); // Sin datos
+    expect(compressBase64('data:;base64,test')).toBe(''); // MIME type vacío
+  });
+
+  it('should pass all test cases', () => {
+  // Casos que ya pasaban
+  expect(compressBase64('data:image/png;base64,iVBOR...')).toBe('iVBOR...');
+  expect(compressBase64('SGVsbG8=')).toBe('SGVsbG8');
+  expect(compressBase64(null as any)).toBe('');
+  
+  // Casos de prefijos mal formados
+  expect(compressBase64('data:image/png;base64:')).toBe('');
+  expect(compressBase64('data:image/png;base64=')).toBe('');
+  
+  // Casos específicos que faltaban
+  expect(compressBase64('data:image/png;base64')).toBe('');  
+  expect(compressBase64('data:;base64,test')).toBe('');
+  
+  // Casos edge adicionales
+  expect(compressBase64('data:text/plain;base64,')).toBe('');
+  expect(compressBase64('data:application/octet-stream;base64,===')).toBe('');
+});
+
+it('should pass all test cases', () => {
+  // Casos con prefijo válido
+  expect(compressBase64('data:image/png;base64,iVBOR...')).toBe('iVBOR...');
+  
+  // Strings sin prefijo
+  expect(compressBase64('SGVsbG8=')).toBe('SGVsbG8');
+  expect(compressBase64('A/B+C==')).toBe('A_B-C');
+  
+  // Valores no string
+  expect(compressBase64(null as any)).toBe('');
+  expect(compressBase64(undefined as any)).toBe('');
+  
+  // Prefijos mal formados
+  expect(compressBase64('data:image/png;base64:')).toBe('');
+  expect(compressBase64('data:image/png;base64=')).toBe('');
+  expect(compressBase64('data:image/png;base64')).toBe('');  
+  expect(compressBase64('data:;base64,test')).toBe('');
+  
+  // Casos edge
+  expect(compressBase64('data:text/plain;base64,')).toBe('');
+  expect(compressBase64('data:application/octet-stream;base64,===')).toBe('');
+});
 });
