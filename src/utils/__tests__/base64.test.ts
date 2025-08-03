@@ -297,20 +297,22 @@ describe('rebuildBase64', () => {
   it('should be inverse of compressBase64', () => {
     const original = 'data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAUAAAAFCAYAAACNbyblAAAAHElEQVQI12P4//8/w38GIAXDIBKE0DHxgljNBAAO9TXL0Y4OHwAAAABJRU5ErkJggg==';
     const compressed = compressBase64(original);
-    console.log(compressed)
     const rebuilt = rebuildBase64(compressed, 'image/png');
+
     expect(rebuilt).toBe(original);
   });
 
   it('should handle URL-safe strings', () => {
     const original = 'data:image/png;base64,a+b/c=='; // Nota: 2 ==
     const compressed = 'a_b-c';
+
     expect(rebuildBase64(compressed, 'image/png')).toBe(original);
   });
 
   it('should handle mixed cases', () => {
     const original = 'data:image/jpeg;base64,a+b/c+d=';
     const compressed = 'a_b-c_d';
+
     expect(rebuildBase64(compressed)).toBe(original);
   });
 });
