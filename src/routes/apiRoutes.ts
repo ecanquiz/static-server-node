@@ -1,6 +1,6 @@
 import express, { Router } from "express";
 import path from 'path';
-import { mainScreen } from '@config/index';
+import config from '@config/index';
 import validateSharedToken from "@middlewares/validateSharedTokenMiddleware";
 import validateImages from "@middlewares/validateImagesMiddleware";
 import { publicFile } from "@controllers/publicFileController"
@@ -22,7 +22,7 @@ router.use('/storage', express.static(publicStorageLink), (req, res) => {
   res.status(404).send('Sorry, the requested file in storage does not exist..');
 });
 
-router.get('/', (req, res) => { res.send(mainScreen); });
+router.get('/', (req, res) => { res.send(config.mainScreen); });
 
 // Serving static files from 'public/images'
 router.get('/api/public-file/:articleId/:filename', publicFile);
