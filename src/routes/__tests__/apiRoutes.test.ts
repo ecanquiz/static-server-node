@@ -1,7 +1,7 @@
 import {describe, it, expect} from 'vitest'
 import request from 'supertest'
 import app from '../../app'
-import { mainScreen } from '../../config/index';
+import config from '../../config/index';
 
 describe('apiRoutes', () => {
   it('Should respond with 404 for unknown routes', async () => {
@@ -12,6 +12,6 @@ describe('apiRoutes', () => {
   it('Should respond with 200 for health check', async () => {
     const response = await request(app).get('/')
     expect(response.statusCode).toBe(200)
-    expect(response.text).toContain(mainScreen);
+    expect(response.text).toContain(config.mainScreen);
   })
 })

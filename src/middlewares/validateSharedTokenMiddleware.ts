@@ -1,5 +1,5 @@
 import type { Request, Response, NextFunction } from 'express';
-import { apiSharedTokens } from '@config/index';
+import config from '@config/index';
 
 interface ErrorResponse {
   error: string;
@@ -12,7 +12,7 @@ export default function(
   next: NextFunction
 ): Response<ErrorResponse> | void  {
   try {
-    const tokens: Record<string, string> = JSON.parse(apiSharedTokens);
+    const tokens: Record<string, string> = config.apiSharedTokens;
 
     const client = req.headers['x-client-name'];
     if (!client) {
