@@ -4,6 +4,7 @@ dotenv.config();
 const config = {
   get host(): string {
     try {
+      if (!process.env.HOST) console.warn('HOST not set, using default');
       const host = process.env.HOST ?? 'http://localhost';
       new URL(host); // Additional URL validation
       return host;
@@ -14,7 +15,12 @@ const config = {
 
   get port(): number {
     try {
-      return parseInt(process.env.PORT || '9000');
+      if (process.env.PORT === null || process.env.PORT === '') throw new Error(); 
+      const portStr = process.env.PORT || '9000';
+      if (!/^\d+$/.test(portStr)) throw new Error();
+      const port = parseInt(portStr, 10);
+      if (port < 1 || port > 65535) throw new Error();
+      return port;
     } catch (e) {
       throw new Error('Invalid PORT format. Expected number');
     }
@@ -22,6 +28,7 @@ const config = {
 
   get apiAllowedOrigins(): string[] {
     try {
+      if (process.env.API_ALLOWED_ORIGINS === undefined) throw new Error(); 
       const origins = JSON.parse(process.env.API_ALLOWED_ORIGINS || '[]');
       if (!Array.isArray(origins)) throw new Error();
       return origins;
@@ -32,8 +39,16 @@ const config = {
 
   get apiSharedTokens(): Record<string, string> {
     try {
+      if (process.env.API_SHARED_TOKENS === undefined) throw new Error(); 
       const tokens = JSON.parse(process.env.API_SHARED_TOKENS || '{}');
-      if (typeof tokens !== 'object' || tokens === null) throw new Error();
+      if (
+        typeof tokens !== 'object' || 
+        tokens === null ||
+        Array.isArray(tokens) ||
+        Object.values(tokens).some(v => typeof v !== 'string')
+      ) {
+        throw new Error();
+      }
       return tokens;
     } catch (e) {
       throw new Error('Invalid API_SHARED_TOKENS format. Expected JSON object');
