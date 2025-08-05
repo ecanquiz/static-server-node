@@ -9,7 +9,11 @@ const app = express();
 app.use(cors({
   origin: config.apiAllowedOrigins,
   methods: ['GET', 'OPTIONS'],
-  allowedHeaders: ['Content-Type', 'Authorization']
+  allowedHeaders: [
+    'Content-Type',
+    'Authorization',
+    'Accept'
+  ]
 }));
 
 app.use(apiRoutes);

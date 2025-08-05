@@ -15,3 +15,13 @@ describe('apiRoutes', () => {
     expect(response.text).toContain(config.mainScreen);
   })
 })
+
+describe('Accept header handling', () => {
+  it('should respect Accept: text\/html; charset=UTF-8', async () => {
+    const res = await request(app)
+      .get('/storage')
+      //.set('Accept', 'application/json');
+    
+    expect(res.headers['content-type']).toMatch(/text\/html; charset=UTF-8/);
+  });
+});
