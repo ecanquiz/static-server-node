@@ -1,7 +1,9 @@
-import { describe, it, expect, vi, beforeEach, afterEach } from 'vitest';
+import { describe, it, expect, vi, beforeEach, afterEach, MockInstance } from 'vitest';
 import { Request, Response, NextFunction } from 'express';
 import validateSharedTokenMiddleware from '../validateSharedTokenMiddleware';
 import config from '../../config/index';
+
+type Config = Omit<typeof config, 'apiAllowedOrigins' | 'mainScreen'>
 
 vi.mock('../../config/index', () => ({
   default: {
@@ -13,15 +15,14 @@ vi.mock('../../config/index', () => ({
     host: 'http://localhost' as string,
     port: 9000 as number,
     // ... 
-  }
+  } as Config
 }));
   
 describe('validateSharedTokenMiddleware', () => {
   let mockRequest: Partial<Request>;
   let mockResponse: Partial<Response>;
   let mockNext: NextFunction;
-  // @ts-ignore
-  let consoleErrorSpy: vi.SpyInstance;
+  let consoleErrorSpy: MockInstance;
 
   beforeEach(() => {
     vi.clearAllMocks();
@@ -44,7 +45,6 @@ describe('validateSharedTokenMiddleware', () => {
   it('should be a function', () => {
     expect(typeof validateSharedTokenMiddleware).toBe('function');
   });
-
 
   describe('Client validation', () => {
     it('should reject requests without x-client-name header', () => {
@@ -175,9 +175,9 @@ describe('validateSharedTokenMiddleware', () => {
       // We directly mock the config dependency
       vi.spyOn(await import('../../config/index'), 'default', 'get').mockReturnValue({
         apiSharedTokens: null as any, // This will force an error
-        host: 'http://localhost',
-        port: 9000
-      } as typeof config);
+        host: 'http://localhost' as string,
+        port: 9000 as number
+      } as Config ); 
 
       originalMiddleware(
         mockRequest as Request,
