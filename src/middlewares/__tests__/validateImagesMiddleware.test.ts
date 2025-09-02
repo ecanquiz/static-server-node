@@ -1,4 +1,4 @@
-import { describe, it, expect, vi, beforeEach, afterEach, MockInstance } from 'vitest';
+import { describe, it, expect, vi, beforeEach, afterEach } from 'vitest';
 import { Request, Response, NextFunction } from 'express';
 import validateImagesMiddleware, { validateImagesInput } from '../validateImagesMiddleware';
 
@@ -6,15 +6,14 @@ describe('validateImagesMiddleware', () => {
   let mockRequest: Partial<Request>;
   let mockResponse: Partial<Response>;
   let mockNext: NextFunction;
-  let consoleErrorSpy: MockInstance;
-  const oneMB = 1024 * 1024 // 1MB
+  let consoleErrorSpy: any;
 
   beforeEach(() => {
     mockRequest = {
       body: {
         images: [
-          { mimetype: 'image/jpeg', size: oneMB },
-          { mimetype: 'image/png',  size: oneMB }
+          'base64string1', // Simula strings base64
+          'base64string2'
         ]
       }
     };
@@ -58,6 +57,9 @@ describe('validateImagesMiddleware', () => {
       );
 
       expect(mockResponse.status).toHaveBeenCalledWith(400);
+      expect(mockResponse.json).toHaveBeenCalledWith({
+        error: 'Images must be an array'
+      });
       expect(mockNext).not.toHaveBeenCalled();
     });
 
@@ -73,38 +75,8 @@ describe('validateImagesMiddleware', () => {
     });
   });
 
-  describe('validateImagesMiddleware', () => {
-    it('should return 400 for missing images', () => {
-      mockRequest.body = {};
-    
-      validateImagesMiddleware(
-        mockRequest as Request,
-        mockResponse as Response,
-        mockNext
-      );
-
-      expect(mockResponse.status).toHaveBeenCalledWith(400);
-      expect(mockResponse.json).toHaveBeenCalledWith({
-        error: 'Images array is required'
-      });
-    });
-
-    it('should return 400 for missing images', () => {
-      mockRequest.body.images = 'is-not-array';
-    
-      validateImagesMiddleware(
-        mockRequest as Request,
-        mockResponse as Response,
-        mockNext
-      );
-
-      expect(mockResponse.status).toHaveBeenCalledWith(400);
-      expect(mockResponse.json).toHaveBeenCalledWith({
-        error: 'Images must be an array'
-      });
-    });
-
-    it('should handle unexpected errors 500', async () => {
+  describe('Error handling', () => {
+    it('should handle unexpected errors with 500', () => {
       validateImagesMiddleware(
         { body: null } as Request,
         mockResponse as Response,
@@ -119,14 +91,13 @@ describe('validateImagesMiddleware', () => {
   });
 });
 
-
 describe('validateImagesInput', () => {
   it('should pass with valid images array', () => {
-    const req = { body: {
-      images: [{
-        mimetype: 'image/jpeg',
-        size: 1024 * 1024 // 1MB
-    }] } };
+    const req = { 
+      body: {
+        images: ['base64string1', 'base64string2']
+      } 
+    };
     expect(() => validateImagesInput(req as Request)).not.toThrow();
   });
 
@@ -141,5 +112,36 @@ describe('validateImagesInput', () => {
     expect(() => validateImagesInput(req as Request))
       .toThrow('INVALID_IMAGES_FORMAT');
   });
-});
 
+  it('should throw on too many images', () => {
+    const req = { 
+      body: { 
+        images: Array(11).fill('base64string') 
+      } 
+    };
+    expect(() => validateImagesInput(req as Request))
+      .toThrow('TOO_MANY_IMAGES');
+  });
+
+  it('should throw on non-string image', () => {
+    const req = { 
+      body: { 
+        images: [123] // Número en lugar de string
+      } 
+    };
+    expect(() => validateImagesInput(req as Request))
+      .toThrow('INVALID_IMAGE_FORMAT');
+  });
+
+  it('should throw on oversized image', () => {
+    // Creamos un string base64 muy grande (>10MB)
+    const hugeBase64 = 'A'.repeat(15 * 1024 * 1024 * 4 / 3); // ~15MB
+    const req = { 
+      body: { 
+        images: [hugeBase64]
+      } 
+    };
+    expect(() => validateImagesInput(req as Request))
+      .toThrow('FILE_TOO_LARGE');
+  });
+});

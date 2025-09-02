@@ -30,57 +30,23 @@ export const validateBase64 = function(data: string): boolean {
 
 export const compressBase64 = function(base64: string): string {
   if (typeof base64 !== 'string') return '';
-  
-  // Handle malformed prefixes
-  if (/^data:[^;]*;base64$/.test(base64)) return '';    // data:image/png;base64
-  if (/^data:;base64,/.test(base64)) return '';         // data:;base64,test
-  if (/^data:[^;]*;base64[^,]/.test(base64)) return ''; // data:image/png;base64:
-
-  // Extract Base64 data (with or without proper prefix)
-  const base64Data = base64.split(';base64,').length === 2 && base64.startsWith('data:') 
-    ? base64.split(';base64,').pop()! 
-    : base64;
-  
-  return base64Data
-    .replace(/\+/g, '-')  // URL-safe +
-    .replace(/\//g, '_')  // URL-safe /
-    .replace(/=+$/, '');  // Remove padding
+  return base64
+    .replace(/^data:\w+\/\w+;base64,/, '')
+    .replace(/\+/g, '-')
+    .replace(/\//g, '_')
+    .replace(/=+$/, '');
 }
 
 export const rebuildBase64 = function(compressed: string, mimeType = 'image/jpeg'): string {
   if (typeof compressed !== 'string') compressed = '';
   
-  // Transformation that works with compressBase64
-  const base64ForCompression = compressed
-    .replace(/_/g, '/')
-    .replace(/-/g, '+');
+  const base64 = compressed
+    .replace(/-/g, '+')
+    .replace(/_/g, '/');
 
-  // Transformation that awaits other tests
-  const base64ForTests = compressed
-    .replace(/_/g, '+')
-    .replace(/-/g, '/');
+  // Padding calculation (múltiplo de 4)
+  const padLength = (4 - (base64.length % 4)) % 4;
+  const paddedBase64 = base64 + '='.repeat(padLength);
 
-  // Decide which transformation to use
-  const base64 = compressed.includes('iVBORw0KGgo') //Detects if it is PNG
-    ? base64ForCompression
-    : base64ForTests;
-
-  let padding = '';
-  let mod4 = base64.length % 4;
-
-  if (mod4 !== 0) {   
-    // Normal padding when it is not a multiple of 4
-    mod4 = mod4 === 1 ? 2 : mod4
-    padding = '='.repeat(4 - mod4);
-  } else if (/[-_]/.test(compressed)) {
-    // For URL-safes that are a multiple of 4, use exactly 2 =
-    padding = '==';
-  }
-
-  // Validación de MIME type
-  const validMimeType = /^[a-z]+\/[a-z0-9+-.]+$/.test(mimeType) 
-    ? mimeType 
-    : 'application/octet-stream';
-
-  return `data:${validMimeType};base64,${base64}${padding}`;
+  return `data:${mimeType};base64,${paddedBase64}`;
 }
