@@ -1,4 +1,4 @@
-import { describe, it, expect, beforeEach, afterEach, vi } from 'vitest';
+import { describe, it, expect, beforeEach, afterEach, vi, expectTypeOf } from 'vitest';
 import config from '../index';
 
 describe('Configuration module', () => {
@@ -158,6 +158,23 @@ describe('Configuration module', () => {
       expect(config.mainScreen).toContain('<h1>Static server with Node.js and Express</h1>');
       expect(config.mainScreen).toContain('href="/images"');
       expect(config.mainScreen).toContain('href="/storage"');
+    });
+  });
+
+  describe('imagesValidation configuration', () => {
+    it('should contain basic config', () => {
+      expectTypeOf(config.imagesValidation).toEqualTypeOf<{
+        ALLOWED_TYPES: string[];
+        MAX_SIZE_MB: number;
+        MAX_IMAGES: number;
+        MAX_SIZE_BYTES: number;
+      }>()
+      expect(config.imagesValidation.ALLOWED_TYPES).toEqual(
+        ['image/jpeg', 'image/png', 'image/gif', 'application/pdf']
+      );
+      expect(config.imagesValidation.MAX_SIZE_MB).toBe(5);
+      expect(config.imagesValidation.MAX_IMAGES).toBe(10);
+      expect(config.imagesValidation.MAX_SIZE_BYTES).toBe(10 * 1024 * 1024); // 10MB 
     });
   });
 

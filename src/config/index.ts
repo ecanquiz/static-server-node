@@ -55,6 +55,13 @@ const config = {
     }
   },
 
+  imagesValidation : {
+    ALLOWED_TYPES: ['image/jpeg', 'image/png', 'image/gif', 'application/pdf'],
+    MAX_SIZE_MB: 5,
+    MAX_IMAGES: 10,
+    MAX_SIZE_BYTES: 10 * 1024 * 1024 // 10MB 
+  },
+
   mainScreen: `
     <h1>Static server with Node.js and Express</h1>
     <p>To access images, visit: <a href="/images">/images</a></p>
