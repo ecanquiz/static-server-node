@@ -3,6 +3,7 @@ import express from 'express';
 import cors from 'cors';
 import apiRoutes from '@routes/apiRoutes'
 import config from '@config/index';
+import { setupSwagger } from '@config/swagger';
 
 const app = express();
 
@@ -15,6 +16,10 @@ app.use(cors({
     'Accept'
   ]
 }));
+
+if (process.env.NODE_ENV === 'development') {
+  setupSwagger(app);
+}
 
 app.use(apiRoutes);
 
