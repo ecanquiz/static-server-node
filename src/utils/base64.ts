@@ -43,9 +43,8 @@ export const rebuildBase64 = function(compressed: string, mimeType = 'image/jpeg
   const base64 = compressed
     .replace(/-/g, '+')
     .replace(/_/g, '/');
-
-  // Padding calculation (múltiplo de 4)
-  const padLength = (4 - (base64.length % 4)) % 4;
+  
+  const padLength = (4 - (base64.length % 4)) % 4; // Padding calculation (multiple of 4)
   const paddedBase64 = base64 + '='.repeat(padLength);
 
   return `data:${mimeType};base64,${paddedBase64}`;
